@@ -1,57 +1,66 @@
+# dependabot.yml — ChannelAssist .NET service / library canonical
+#
+# Applies to repos that ship .NET projects (any `*.csproj` under the repo root).
+# Weekly cadence per SDLC §6.4. Targets the repo's default branch (`dev` per
+# ADR-0023); Dependabot security updates fire on `main` separately regardless
+# of `target-branch`, so the single-target setup is sufficient for security
+# coverage.
+#
+# Each ecosystem block uses catch-all groups so version-update PRs are
+# bundled — single-package PRs cause chain conflicts when adjacent .csproj
+# PackageReference lines change in sequence (see cm-shared-libs #23-#27
+# batch, 2026-05-11, for the worked example that motivated this canonical).
+#
+# Canonical source: cm-platform-infra/templates/dependabot/dotnet.yml.
+# Sync mechanism: cm-platform-infra/scripts/sync-dependabot.sh.
+
 version: 2
 updates:
-  # 02-SetupDevEnvironment
-  - package-ecosystem: "nuget"
-    directory: "/02-SetupDevEnvironment/src"
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-    target-branch: "main"
+    open-pull-requests-limit: 5
+    # Labels: only canonical taxonomy entries from labels.yaml. Per-ecosystem
+    # labels (e.g., "nuget", "github-actions") would either fail to apply or
+    # auto-create off-taxonomy labels with no color/description — Dependabot
+    # PRs are already self-identifying via the commit-message prefix.
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      github-actions-all:
+        applies-to: version-updates
+        patterns:
+          - "*"
 
-  # 03-CoreGenerativeAITechniques
   - package-ecosystem: "nuget"
-    directory: "/03-CoreGenerativeAITechniques/src"
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-    target-branch: "main"
-
-  # 04-PracticalSamples
-  - package-ecosystem: "nuget"
-    directory: "/04-PracticalSamples/src"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    target-branch: "main"
-
-  # 05-AppCreatedWithGenAI - HFMCP.GenImage
-  - package-ecosystem: "nuget"
-    directory: "/05-AppCreatedWithGenAI/HFMCP.GenImage"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    target-branch: "main"
-
-  # 05-AppCreatedWithGenAI - SpaceAINet
-  - package-ecosystem: "nuget"
-    directory: "/05-AppCreatedWithGenAI/SpaceAINet"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    target-branch: "main"
-
-  # 09-ResponsibleGenAI (in case future .NET projects are added)
-  - package-ecosystem: "nuget"
-    directory: "/09-ResponsibleGenAI"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    target-branch: "main"
-
-  # 01-IntroToGenAI (in case future .NET projects are added)
-  - package-ecosystem: "nuget"
-    directory: "/01-IntroToGenAI"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    target-branch: "main"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      otel:
+        applies-to: version-updates
+        patterns:
+          - "OpenTelemetry*"
+      microsoft-extensions:
+        applies-to: version-updates
+        patterns:
+          - "Microsoft.Extensions.*"
+      nuget-all-other:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "OpenTelemetry*"
+          - "Microsoft.Extensions.*"
